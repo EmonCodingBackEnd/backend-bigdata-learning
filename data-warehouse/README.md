@@ -750,7 +750,7 @@ GMV多用于电商行业，实际指的是拍下的订单总金额，包含付�
 
 对 *dwd_user_order* 表中的数据进行统计即可，通过order_money字段可以计算出来GMV，将结果数据保存到表 *app_gmv* 中。
 
-### 3.5.2、脚本执行之
+### 3.5.2、脚本执行之APP层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -758,13 +758,63 @@ GMV多用于电商行业，实际指的是拍下的订单总金额，包含付�
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/dws_init_table_1.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/app_init_table_2.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 重新统计全量数据
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/tmp_load_dws_data_1.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/app_add_partition_2.sh 20260201
+```
+
+## 3.6、需求3：商品相关指标
+
+### 3.6.1、指标1：商品的销售情况
+
+主要统计（商品名称、一级类目、订单总量、销售额）。
+
+订单中的详细信息是在 *dwd_order_item* 表中，需要关联 *dwd_goods_info* 和 *dwd_category_code* 获取商品名称和商品一级类目信息。
+
+在这最好是基于这些表现构建一个商品订单信息的宽表 *dws_order_goods_all_info* 便于后期其它需求复用。
+
+然后基于这个宽表统计出来这个指标需要的信息，保存到表 *app_goods_sales_item* 。
+
+### 3.6.2、指标2：商品品类偏好Top10
+
+主要统计商品一级类目、订单总量。
+
+这个指标可以在第一个指标的基础之上，根据一级类目进行分组，按照类目下的订单总量排序，取Top10，保存到表 *app_category_top10* 中。
+
+### 3.6.3、脚本执行之DWS层
+
+1：表初始化脚本（初始化执行一次）
+
+```bash
+# 初始化ods库与表
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/dws_init_table_3.sh
+```
+
+2：添加分区数据脚本（每天执行一次）
+
+```bash
+# 重新统计全量数据
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/dws_add_partition_3.sh 20260201
+```
+
+### 3.6.3、脚本执行之APP层
+
+1：表初始化脚本（初始化执行一次）
+
+```bash
+# 初始化ods库与表
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/app_init_table_3.sh
+```
+
+2：添加分区数据脚本（每天执行一次）
+
+```bash
+# 重新统计全量数据
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/app_add_partition_3.sh 20260201
 ```
 
