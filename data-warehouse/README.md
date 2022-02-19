@@ -802,7 +802,7 @@ GMV多用于电商行业，实际指的是拍下的订单总金额，包含付�
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/dws_add_partition_3.sh 20260201
 ```
 
-### 3.6.3、脚本执行之APP层
+### 3.6.4、脚本执行之APP层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -816,5 +816,57 @@ GMV多用于电商行业，实际指的是拍下的订单总金额，包含付�
 ```bash
 # 重新统计全量数据
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/app_add_partition_3.sh 20260201
+```
+
+## 3.7、需求4：漏斗分析
+
+### 3.7.1、指标1：漏斗分析
+
+其实就是根据用户的行为一层一层分析用户的转化率。
+
+活跃-->商品详情页-->下单-->支付
+
+每一个指标对应的表：
+
+活跃：*dws_user_active_history*
+
+商品详情页：*dwd_good_item*
+
+下单：*dwd_user_order*
+
+支付：*dwd_user_order*
+
+实现思路：
+
+首先统计当天活跃用户量
+
+接着统计当天进入了多少个商品的详情页
+
+接着统计当天下单的数量
+
+最后统计当天支付的数量
+
+
+
+并且计算每一层的转化率，最终把结果数据保存到表 *app_user_conver_funnel*中。
+
+
+
+### 3.7.3、脚本执行之DWS层
+
+### 3.7.2、脚本执行之APP层
+
+1：表初始化脚本（初始化执行一次）
+
+```bash
+# 初始化ods库与表
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/app_init_table_4.sh
+```
+
+2：添加分区数据脚本（每天执行一次）
+
+```bash
+# 重新统计全量数据
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/app_add_partition_4.sh 20260201
 ```
 
