@@ -572,5 +572,67 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_add_partition_5.sh
 ```
 
+## 1.10、需求6：APP崩溃相关指标
+
+### 1.10.1、指标1：每日操作系统崩溃总计（安卓、IOS）
+
+### 1.10.2、指标2：每日安卓系统-不同APP版本崩溃量
+
+### 1.10.3、指标2：每日IOS系统-不同APP版本崩溃量
+
+针对以上指标，统一分析如下：
+
+实现思路：
+
+针对第一个指标使用 *dwd_app_close，根据platform进行分组统计即可
+
+但是注意：第二个指标和第三个指标，也需要根据不同的platform进行统计，但是又多个一个操作系统的维度，如果按照我们刚才的分析，直接基于platform进行分组的话，针对后面两个指标还需要重新计算中间表，没有体现出来数据仓库的好处。
+
+所以我们可以这样做：
+
+针对 *dwd_app_close* 表中的数据，使用platform和vercode进行分组，做轻度聚合，将数据保存到DWS层的 *dws_app_close_platform_vercode* 表中，基于 *dws_app_close_platform_vercode* 表中的数据就可以计算出来这三个指标了。
+
+这三个指标的结果分别保存到APP层的以下这些表中。
+
+每日操作系统崩溃总计（安卓、IOS）：*app_app_close_platform_all*
+
+每日安卓系统-不同APP版本崩溃量：*app_app_close_android_vercode*
+
+每日IOS系统-不同APP版本崩溃量：*app_app_close_ios_vercode*
+
+
+
+### 1.10.4、脚本执行之DWS层
+
+1：表初始化脚本（初始化执行一次）
+
+```bash
+# 初始化ods库与表
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/dws_init_table_6.sh
+```
+
+2：添加分区数据脚本（每天执行一次）
+
+```bash
+# 添加分区：20260201-20260209
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dws_data_6.sh
+```
+
+### 1.10.5、脚本执行之APP层
+
+1：表初始化脚本（初始化执行一次）
+
+```bash
+# 初始化ods库与表
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_init_table_6.sh
+```
+
+2：添加分区数据脚本（每天执行一次）
+
+```bash
+# 添加分区：20260201-20260209
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_6.sh
+```
+
 # 三、电商数据仓库之商品订单数仓
 
