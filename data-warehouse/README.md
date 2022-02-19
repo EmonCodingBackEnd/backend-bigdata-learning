@@ -54,9 +54,11 @@
 
 # 二、电商数据仓库之用户行为数仓
 
-## 1.1、数据采集
+## 2.1、数据准备
 
-### 1.1.1、创建数据库和表
+
+
+### 2.1.1、创建数据库和表
 
 - 创建数据库
 
@@ -77,7 +79,7 @@ use warehousedb;
 mysql -uflyin -pFlyin@123 warehousedb < /home/emon/bigdata/warehouse/data/init_mysql_tables.sql
 ```
 
-### 1.1.2、初始化数据
+### 2.1.2、初始化数据
 
 - 初始化UserAction数据
 
@@ -87,7 +89,9 @@ mysql -uflyin -pFlyin@123 warehousedb < /home/emon/bigdata/warehouse/data/init_m
 
 执行类：`com.coding.bigdata.useraction.GenerateGoodsOrderData`
 
-### 1.1.3、采集数据
+### 2.1.3、数据导入Hadoop
+
+#### 2.1.3.1、用户订单数据表详情
 
 - 对小表，全量采集
 - 对大表，增量采集（按照变更时间）
@@ -100,7 +104,7 @@ mysql -uflyin -pFlyin@123 warehousedb < /home/emon/bigdata/warehouse/data/init_m
 | goods_info    | 全量     | payment_flow   | 增量     |
 | category_code | 全量     |                |          |
 
-#### 1.1.3.1、采集UserAction数据
+#### 2.1.3.2、UserAction数据导入Hadoop
 
 - 启动flume脚本
 
@@ -112,7 +116,7 @@ flume-ng agent --conf /usr/local/flume/conf \
 -Dflume.root.logger=INFO,console
 ```
 
-#### 1.1.3.2、采集GoodsOrder数据
+#### 2.1.3.3、GoodsOrder数据导入Hadoop
 
 - 执行全量采集脚本
 
@@ -126,7 +130,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_full.sh 2026
 sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 20260101
 ```
 
-## 1.2、创建ODS层
+## 2.2、创建ODS层
 
 - 表介绍
 
@@ -147,7 +151,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/ods_add_partition.sh 20260101
 ```
 
-## 1.3、创建DWD层
+## 2.3、创建DWD层
 
 - 表介绍
 
@@ -168,9 +172,9 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/dwd_add_partition.sh 20260101
 ```
 
-## 1.4、需求分析与模拟数据初始化
+## 2.4、需求分析与模拟数据初始化
 
-### 1.4.1、需求列表
+### 2.4.1、需求列表
 
 - 需求1：每日新增用户相关指标
 - 需求2：每日活跃用户（主活）相关指标
@@ -179,7 +183,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 - 需求5：操作系统活跃用户相关指标
 - 需求6：APP崩溃相关指标
 
-### 1.4.2、模拟20260201-20260228数据
+### 2.4.2、模拟20260201-20260228数据
 
 - 初始化UserAction数据
 
@@ -189,7 +193,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 执行类：`com.coding.bigdata.useraction.GenerateGoodsOrderData2`
 
-### 1.4.3·添加分区
+### 2.4.3·添加分区
 
 ```bash
 # 添加ods分区：20260201-20260228
@@ -198,11 +202,11 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dwd_data.sh
 ```
 
-## 1.5、需求1：每日新增用户相关指标
+## 2.5、需求1：每日新增用户相关指标
 
 新增用户：也指新增设备，指第一次安装并且使用app的用户，后期卸载之后再使用就不是新用户了。
 
-### 1.5.1、指标1：每日新增用户量
+### 2.5.1、指标1：每日新增用户量
 
 - ods层表名：ods_user_active
 - dwd层表名：dwd_user_active
@@ -267,7 +271,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 最后，删除这个临时表。
 
-### 1.5.2、指标2：每日新增用户量的日环比和周同比
+### 2.5.2、指标2：每日新增用户量的日环比和周同比
 
 同比：一般是指本期统计数据和往年的同时期的统计数据比较。
 
@@ -287,7 +291,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 里面包含日期、新增用户量、日环比、周同比。
 
-### 1.5.3、汇总总结
+### 2.5.3、汇总总结
 
 我们最终要在DWS创建3个表：
 
@@ -300,7 +304,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 - app_user_new_count
 - app_user_new_count_ratio
 
-### 1.5.4、脚本执行之DWS层
+### 2.5.4、脚本执行之DWS层
 
 针对dws层抽取脚本：
 
@@ -318,7 +322,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dws_data_1.sh
 ```
 
-### 1.5.5、脚本执行之APP层
+### 2.5.5、脚本执行之APP层
 
 针对dws层抽取脚本：
 
@@ -336,17 +340,17 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_1.sh
 ```
 
-## 1.6、需求2：每日活跃用户（主活）相关指标
+## 2.6、需求2：每日活跃用户（主活）相关指标
 
-### 1.6.1、指标1：每日主活用户量
+### 2.6.1、指标1：每日主活用户量
 
 直接使用dws层的`dws_user_active_history`这个表，直接求和即可获取到当日的主活用户量，将最终的结果保存到app层的`app_user_active_count`表中。
 
-### 1.6.2、指标2：每日主活用户量的日环比和周同比
+### 2.6.2、指标2：每日主活用户量的日环比和周同比
 
 这个指标直接基于每日主活用户量的表`app_user_active_count`进行计算即可，把最终的结果保存到app层的`app_user_active_count_ratio`表中。
 
-### 1.6.3、脚本执行之APP层
+### 2.6.3、脚本执行之APP层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -362,7 +366,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_2.sh
 ```
 
-### 1.6.4、扩展需求：如何统计每周每月的主活用户量
+### 2.6.4、扩展需求：如何统计每周每月的主活用户量
 
 每周：按照自然周，每周一凌晨计算上一周的主活。
 
@@ -370,11 +374,11 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 
 
-## 1.7、需求3：用户7日流失push提醒相关指标
+## 2.7、需求3：用户7日流失push提醒相关指标
 
 如果2.2日首次进入，一直到2.9日都没再登录，算7日流失。
 
-### 1.7.1、指标1：用户7日流失push
+### 2.7.1、指标1：用户7日流失push
 
 第一步：基于 *dws_user_active_history* 表，获取表中最近8天（登陆日+后续7日）的数据，根据xaid进行分组，这样可以获取xaid以及xaid对应的多个日期(dt)。
 
@@ -420,7 +424,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 第四步：对 *dws_user_lost_item* 表中的数据进行聚合统计，统计用户7日流失数据量，保存到APP层的 *app_user_lost_count* 表中。
 
-### 1.7.2、脚本执行之DWS层
+### 2.7.2、脚本执行之DWS层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -436,7 +440,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dws_data_3.sh
 ```
 
-### 1.7.3、脚本执行之APP层
+### 2.7.3、脚本执行之APP层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -452,9 +456,9 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_3.sh
 ```
 
-## 1.8、需求4：每日启动App次数相关指标
+## 2.8、需求4：每日启动App次数相关指标
 
-### 1.8.1、指标1：每日人均启动APP次数
+### 2.8.1、指标1：每日人均启动APP次数
 
 每日人均启动APP次数=当日所有用户启动APP总次数/当日所有人数
 
@@ -464,13 +468,13 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 第二步：将计算的结果到APP层的 *app_user_open_app_count* 表。
 
-### 1.8.2、指标2：每日APP启动次数分布（1次2次3次及以上）
+### 2.8.2、指标2：每日APP启动次数分布（1次2次3次及以上）
 
 实现思路：
 
 对 *dws_user_active_history* 里面的times字段进行统计，计算times=1的数据条数、times=2的数据条数以及times>=3的数据条数即可，将最终的结果保存到APP层的 *app_user_open_app_distrib*。
 
-### 1.8.3、脚本执行之APP层
+### 2.8.3、脚本执行之APP层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -486,19 +490,19 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_4.sh
 ```
 
-## 1.9、需求5：操作系统活跃用户相关指标
+## 2.9、需求5：操作系统活跃用户相关指标
 
-### 1.9.1、指标1：操作系统活跃用户分布（安卓、IOS）
+### 2.9.1、指标1：操作系统活跃用户分布（安卓、IOS）
 
-### 1.9.2、指标2：安卓系统版本活跃用户分布
+### 2.9.2、指标2：安卓系统版本活跃用户分布
 
-### 1.9.3、指标3：IOS系统版本活跃用户分布
+### 2.9.3、指标3：IOS系统版本活跃用户分布
 
-### 1.9.4、指标4：设备品牌活跃用户分布
+### 2.9.4、指标4：设备品牌活跃用户分布
 
-### 1.9.5、指标5：设备型号活跃用户分布
+### 2.9.5、指标5：设备型号活跃用户分布
 
-### 1.9.6、指标6：网络类型活跃用户分布
+### 2.9.6、指标6：网络类型活跃用户分布
 
 针对以上6大指标，其实主要就是针对 *dwd_user_active* 表中的这些相关维度字段进行分组聚合统计。
 
@@ -540,7 +544,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 >
 > *app_user_net_distrib*
 
-### 1.9.7、脚本执行之DWS层
+### 2.9.7、脚本执行之DWS层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -556,7 +560,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dws_data_5.sh
 ```
 
-### 1.9.7、脚本执行之APP层
+### 2.9.7、脚本执行之APP层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -572,13 +576,13 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_add_partition_5.sh
 ```
 
-## 1.10、需求6：APP崩溃相关指标
+## 2.10、需求6：APP崩溃相关指标
 
-### 1.10.1、指标1：每日操作系统崩溃总计（安卓、IOS）
+### 2.10.1、指标1：每日操作系统崩溃总计（安卓、IOS）
 
-### 1.10.2、指标2：每日安卓系统-不同APP版本崩溃量
+### 2.10.2、指标2：每日安卓系统-不同APP版本崩溃量
 
-### 1.10.3、指标2：每日IOS系统-不同APP版本崩溃量
+### 2.10.3、指标2：每日IOS系统-不同APP版本崩溃量
 
 针对以上指标，统一分析如下：
 
@@ -602,7 +606,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 
 
-### 1.10.4、脚本执行之DWS层
+### 2.10.4、脚本执行之DWS层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -618,7 +622,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dws_data_6.sh
 ```
 
-### 1.10.5、脚本执行之APP层
+### 2.10.5、脚本执行之APP层
 
 1：表初始化脚本（初始化执行一次）
 
@@ -635,4 +639,13 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 ```
 
 # 三、电商数据仓库之商品订单数仓
+
+## 3.1、数据采集
+
+| 表名 | 说明 | 导入方式 |      |
+| ---- | ---- | -------- | ---- |
+|      |      |          |      |
+|      |      |          |      |
+|      |      |          |      |
+|      |      |          |      |
 
