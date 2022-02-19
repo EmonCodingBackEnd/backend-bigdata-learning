@@ -10,3 +10,4 @@ for ((i = 1; i <= 28; i++)); do
   echo "ods_add_partition.sh" ${dt}
   sh /home/emon/bigdata/warehouse/shell/goodsOrder/ods_add_partition.sh ${dt}
 done
+

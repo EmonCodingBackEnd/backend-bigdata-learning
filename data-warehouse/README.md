@@ -722,3 +722,49 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/collect_data_incr.sh 20260101
 
 ### 3.4.2、脚本执行之DWS层
 
+1：表初始化脚本（初始化执行一次）
+
+```bash
+# 初始化ods库与表
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/dws_init_table_1.sh
+```
+
+2：添加分区数据脚本（每天执行一次）
+
+```bash
+# 重新统计全量数据
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/tmp_load_dws_data_1.sh
+```
+
+## 3.5、需求2：电商GMV
+
+GMV：指一定时间段内的成交总金额。
+
+GMV多用于电商行业，实际指的是拍下的订单总金额，包含付款和未付款的部分。
+
+### 3.5.1、指标1：电商GMV
+
+我们在统计的时候就可以将订单表中的每天的所有订单金额全部累加起来就可以获取到当天的GMV了。
+
+实现思路：
+
+对 *dwd_user_order* 表中的数据进行统计即可，通过order_money字段可以计算出来GMV，将结果数据保存到表 *app_gmv* 中。
+
+### 3.5.2、脚本执行之
+
+1：表初始化脚本（初始化执行一次）
+
+1：表初始化脚本（初始化执行一次）
+
+```bash
+# 初始化ods库与表
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/dws_init_table_1.sh
+```
+
+2：添加分区数据脚本（每天执行一次）
+
+```bash
+# 重新统计全量数据
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/tmp_load_dws_data_1.sh
+```
+

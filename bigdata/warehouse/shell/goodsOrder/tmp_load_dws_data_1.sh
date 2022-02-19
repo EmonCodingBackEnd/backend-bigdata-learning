@@ -7,7 +7,7 @@ for ((i = 1; i <= 28; i++)); do
   else
     dt="202602"$i
   fi
-  echo "dwd_add_partition.sh" ${dt}
-  sh /home/emon/bigdata/warehouse/shell/goodsOrder/dwd_add_partition.sh ${dt}
+  echo "dws_add_partition_1.sh" ${dt}
+  sh /home/emon/bigdata/warehouse/shell/goodsOrder/dws_add_partition_1.sh ${dt}
 done
 
