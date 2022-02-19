@@ -34,3 +34,4 @@ from dws_warehousedb.dws_app_close_platform_vercode
 where dt = '${dt}' and platform = 2
 group by vercode;
 "
+

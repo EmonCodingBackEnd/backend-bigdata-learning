@@ -11,3 +11,4 @@ for ((i = 1; i <= 9; i++)); do
   echo "app_add_partition_1.sh" ${dt}
   sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_add_partition_6.sh ${dt}
 done
+

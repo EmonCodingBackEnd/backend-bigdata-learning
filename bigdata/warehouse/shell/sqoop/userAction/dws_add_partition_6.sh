@@ -18,3 +18,4 @@ from dwd_warehousedb.dwd_app_close
 where dt = '${dt}' and platform in (1,2)
 group by platform,vercode;
 "
+

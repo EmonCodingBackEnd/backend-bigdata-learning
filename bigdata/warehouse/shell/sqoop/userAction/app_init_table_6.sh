@@ -7,7 +7,7 @@ create database if not exists app_warehousedb;
 
 create external table if not exists app_warehousedb.app_app_close_platform_all(
     ty    string,
-	num    int
+    num    int
 )partitioned by(dt string)
  row format delimited  
  fields terminated by '\t'
@@ -16,7 +16,7 @@ create external table if not exists app_warehousedb.app_app_close_platform_all(
 
 create external table if not exists app_warehousedb.app_app_close_android_vercode(
     ty    string,
-	num    int
+    num    int
 )partitioned by(dt string)
  row format delimited  
  fields terminated by '\t'
@@ -25,9 +25,10 @@ create external table if not exists app_warehousedb.app_app_close_android_vercod
 
 create external table if not exists app_warehousedb.app_app_close_ios_vercode(
     ty    string,
-	num    int
+    num    int
 )partitioned by(dt string)
  row format delimited  
  fields terminated by '\t'
  location 'hdfs://emon:8020/custom/data/warehouse/app/app_close_ios_vercode';
 "
+
