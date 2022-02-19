@@ -14,8 +14,8 @@ fi
 #alter table ods_mall.ods_good_item add  if not exists partition(dt='20260101') location '20260101/3';
 #alter table ods_mall.ods_good_list add  if not exists partition(dt='20260101') location '20260101/4';
 #alter table ods_mall.ods_app_close add  if not exists partition(dt='20260101') location '20260101/5';
-sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/add_partition.sh ods_warehousedb.ods_user_active ${dt} ${dt}/1
-sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/add_partition.sh ods_warehousedb.ods_click_good ${dt} ${dt}/2
-sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/add_partition.sh ods_warehousedb.ods_good_item ${dt} ${dt}/3
-sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/add_partition.sh ods_warehousedb.ods_good_list ${dt} ${dt}/4
-sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/add_partition.sh ods_warehousedb.ods_app_close ${dt} ${dt}/5
+sh /home/emon/bigdata/warehouse/shell/userAction/add_partition.sh ods_warehousedb.ods_user_active ${dt} ${dt}/1
+sh /home/emon/bigdata/warehouse/shell/userAction/add_partition.sh ods_warehousedb.ods_click_good ${dt} ${dt}/2
+sh /home/emon/bigdata/warehouse/shell/userAction/add_partition.sh ods_warehousedb.ods_good_item ${dt} ${dt}/3
+sh /home/emon/bigdata/warehouse/shell/userAction/add_partition.sh ods_warehousedb.ods_good_list ${dt} ${dt}/4
+sh /home/emon/bigdata/warehouse/shell/userAction/add_partition.sh ods_warehousedb.ods_app_close ${dt} ${dt}/5

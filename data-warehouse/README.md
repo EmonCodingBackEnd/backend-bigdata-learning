@@ -89,7 +89,7 @@ mysql -uflyin -pFlyin@123 warehousedb < /home/emon/bigdata/warehouse/data/init_m
 
 执行类：`com.coding.bigdata.useraction.GenerateGoodsOrderData`
 
-### 2.1.3、数据导入Hadoop
+### 2.1.3、数据采集
 
 #### 2.1.3.1、用户订单数据表详情
 
@@ -104,7 +104,7 @@ mysql -uflyin -pFlyin@123 warehousedb < /home/emon/bigdata/warehouse/data/init_m
 | goods_info    | 全量     | payment_flow   | 增量     |
 | category_code | 全量     |                |          |
 
-#### 2.1.3.2、UserAction数据导入Hadoop
+#### 2.1.3.2、数据采集之UserAction数据
 
 - 启动flume脚本
 
@@ -116,18 +116,18 @@ flume-ng agent --conf /usr/local/flume/conf \
 -Dflume.root.logger=INFO,console
 ```
 
-#### 2.1.3.3、GoodsOrder数据导入Hadoop
+#### 2.1.3.3、数据采集之GoodsOrder数据
 
 - 执行全量采集脚本
 
 ```bash
-sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_full.sh 20260101
+sh /home/emon/bigdata/warehouse/shell/sqoop/collect_data_full.sh 20260101
 ```
 
 - 执行增量采集脚本
 
 ```bash
-sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 20260101
+sh /home/emon/bigdata/warehouse/shell/sqoop/collect_data_incr.sh 20260101
 ```
 
 ## 2.2、创建ODS层
@@ -146,9 +146,9 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/ods_init_table.sh 
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/ods_init_table.sh 
 # 添加分区
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/ods_add_partition.sh 20260101
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/ods_add_partition.sh 20260101
 ```
 
 ## 2.3、创建DWD层
@@ -167,9 +167,9 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/dwd_init_table.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/dwd_init_table.sh
 # 添加分区
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/dwd_add_partition.sh 20260101
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/dwd_add_partition.sh 20260101
 ```
 
 ## 2.4、需求分析与模拟数据初始化
@@ -197,9 +197,9 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 添加ods分区：20260201-20260228
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_ods_data.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_ods_data.sh
 # 添加dwd分区：20260201-20260228
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dwd_data.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_dwd_data.sh
 ```
 
 ## 2.5、需求1：每日新增用户相关指标
@@ -312,14 +312,14 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/dws_init_table_1.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/dws_init_table_1.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 添加分区：20260201-20260209
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dws_data_1.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_dws_data_1.sh
 ```
 
 ### 2.5.5、脚本执行之APP层
@@ -330,14 +330,14 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_init_table_1.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/app_init_table_1.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 添加分区：20260201-20260209
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_1.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_app_data_1.sh
 ```
 
 ## 2.6、需求2：每日活跃用户（主活）相关指标
@@ -356,14 +356,14 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_init_table_2.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/app_init_table_2.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 添加分区：20260201-20260209
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_2.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_app_data_2.sh
 ```
 
 ### 2.6.4、扩展需求：如何统计每周每月的主活用户量
@@ -430,14 +430,14 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/dws_init_table_3.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/dws_init_table_3.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 添加分区：20260201-20260209
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dws_data_3.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_dws_data_3.sh
 ```
 
 ### 2.7.3、脚本执行之APP层
@@ -446,14 +446,14 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_init_table_3.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/app_init_table_3.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 添加分区：20260201-20260209
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_3.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_app_data_3.sh
 ```
 
 ## 2.8、需求4：每日启动App次数相关指标
@@ -480,14 +480,14 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_init_table_4.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/app_init_table_4.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 添加分区：20260201-20260209
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_4.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_app_data_4.sh
 ```
 
 ## 2.9、需求5：操作系统活跃用户相关指标
@@ -550,14 +550,14 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/dws_init_table_5.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/dws_init_table_5.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 添加分区：20260201-20260209
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dws_data_5.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_dws_data_5.sh
 ```
 
 ### 2.9.7、脚本执行之APP层
@@ -566,14 +566,14 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_init_table_5.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/app_init_table_5.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 重新统计全量数据
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_add_partition_5.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/app_add_partition_5.sh
 ```
 
 ## 2.10、需求6：APP崩溃相关指标
@@ -612,14 +612,14 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/dws_init_table_6.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/dws_init_table_6.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 添加分区：20260201-20260209
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_dws_data_6.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_dws_data_6.sh
 ```
 
 ### 2.10.5、脚本执行之APP层
@@ -628,24 +628,30 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/goodsOrder/collect_data_incr.sh 2026
 
 ```bash
 # 初始化ods库与表
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/app_init_table_6.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/app_init_table_6.sh
 ```
 
 2：添加分区数据脚本（每天执行一次）
 
 ```bash
 # 添加分区：20260201-20260209
-[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/tmp_load_app_data_6.sh
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/userAction/tmp_load_app_data_6.sh
 ```
 
 # 三、电商数据仓库之商品订单数仓
 
-## 3.1、数据采集
+## 3.1、创建ODS层
 
-| 表名 | 说明 | 导入方式 |      |
-| ---- | ---- | -------- | ---- |
-|      |      |          |      |
-|      |      |          |      |
-|      |      |          |      |
-|      |      |          |      |
+- 表介绍
 
+| 表名               | 说明           | 导入方式 |
+| ------------------ | -------------- | -------- |
+| ods_user           | 用户信息表     | 全量     |
+| ods_user_extend    | 用户扩展表     | 全量     |
+| ods_user_addr      | 用户收货地址表 | 全量     |
+| ods_goods_info     | 商品信息表     | 全量     |
+| ods_category_code  | 商品类目码表   | 全量     |
+| ods_user_order     | 订单表         | 增量     |
+| ods_order_item     | 订单商品表     | 增量     |
+| ods_order_delivery | 订单收货表     | 增量     |
+| ods_payment_flow   | 支付流水表     | 增量     |

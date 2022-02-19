@@ -8,8 +8,7 @@ for ((i = 1; i <= 9; i++)); do
     dt="202602"$i
   fi
 
-  echo "dws_add_partition_1.sh" ${dt}
-  sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/dws_add_partition_6.sh ${dt}
+  echo "app_add_partition_1.sh" ${dt}
+  sh /home/emon/bigdata/warehouse/shell/userAction/app_add_partition_2.sh ${dt}
 done
-
 

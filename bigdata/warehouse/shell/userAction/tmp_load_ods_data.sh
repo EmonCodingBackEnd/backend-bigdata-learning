@@ -9,6 +9,6 @@ for ((i = 1; i <= 28; i++)); do
   fi
 
   echo "ods_add_partition.sh" ${dt}
-  sh /home/emon/bigdata/warehouse/shell/sqoop/userAction/ods_add_partition.sh ${dt}
+  sh /home/emon/bigdata/warehouse/shell/userAction/ods_add_partition.sh ${dt}
 done
 
