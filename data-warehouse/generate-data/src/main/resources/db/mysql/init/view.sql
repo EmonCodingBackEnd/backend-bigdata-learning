@@ -1,0 +1,97 @@
+-- -------------------------------------------------
+-- 视图
+-- -------------------------------------------------
+-- drop view order_view;
+--
+-- create
+-- 	view order_view as (
+--     select
+--       ov.*
+--     from
+--       (
+--       select
+--         id 'id',
+--         1 'order_type',
+--         tenant_id 'tenant_id',
+--         shop_id 'shop_id',
+--         buyer_id 'buyer_id',
+--         order_status 'order_status',
+--         order_time 'order_time',
+--         order_channel 'order_channel',
+--         order_description 'order_description',
+--         pay_status 'pay_status',
+--         pay_time 'pay_time',
+--         pay_order_id 'pay_order_id',
+--         pay_description 'pay_description',
+--         drawer 'drawer',
+--         draw_time 'draw_time',
+--         drawer_description 'drawer_description',
+--         verifier 'verifier',
+--         verify_time 'verify_time',
+--         verify_channel 'verify_channel',
+--         verifier_description 'verifier_description',
+--         order_amount 'order_amount',
+--         expire_time 'expire_time',
+--         goods_top_type 'goods_top_type',
+--         goods_type 'goods_type',
+--         is_equity 'is_equity',
+--         sale_mode 'sale_mode',
+--         evaluate_status 'evaluate_status',
+-- 		    welfare_flag 'welfare_flag',
+-- 		    welfare_id 'welfare_id',
+--         spu_id 'spu_id',
+--         sku_id 'sku_id',
+--         goods_name 'goods_name',
+--         goods_price 'goods_price',
+--         goods_quantity 'goods_quantity',
+--         goods_icon 'goods_icon'
+--       from
+--         order_master
+--       where
+--         deleted = 0 and goods_top_type=9
+--     union all
+--       select
+--         id 'id',
+--         2 'order_type',
+--         tenant_id 'tenant_id',
+--         shop_id 'shop_id',
+--         cust_id 'buyer_id',
+--         appoint_status 'order_status',
+--         appoint_apply_time 'order_time',
+--         appoint_channel 'order_channel',
+--         appoint_description 'order_description',
+--         pay_status 'pay_status',
+--         pay_time 'pay_time',
+--         pay_order_id 'pay_order_id',
+--         pay_description 'pay_description',
+--         drawer 'drawer',
+--         draw_time 'draw_time',
+--         drawer_description 'drawer_description',
+--         verifier 'verifier',
+--         verify_time 'verify_time',
+--         verify_channel 'verify_channel',
+--         verifier_description 'verifier_description',
+--         deposit_amount 'order_amount',
+--         appoint_day 'expire_time',
+--         goods_top_type 'goods_top_type',
+--         goods_type 'goods_type',
+--         is_equity 'is_equity',
+--         sale_mode 'sale_mode',
+--         evaluate_status 'evaluate_status',
+-- 		    welfare_flag 'welfare_flag',
+-- 		    welfare_id 'welfare_id',
+--         spu_id 'spu_id',
+--         sku_id 'sku_id',
+--         goods_name 'goods_name',
+--         goods_price 'goods_price',
+--         1 'goods_quantity',
+--         goods_icon 'goods_icon'
+--       from
+--         customer_appoint
+--       where
+--         deleted = 0
+--       ) ov
+-- 	)
+
+
+

@@ -1,0 +1,60 @@
+**/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### 自定义 ###
+## 在已忽略文件夹中不忽略某个文件或文件夹
+#/bigdata/*
+#!/bigdata/sync.sh
+
+### 管控bigdata文件夹 ###
+bigdata/flink/lib/*.jar
+
+bigdata/flume/lib/*.jar
+bigdata/flume/**/*.log
+bigdata/flume/**/checkpoint/*
+bigdata/flume/**/**/log-*
+
+bigdata/hadoop/lib/*.jar
+
+bigdata/hive/lib/*.jar
+
+bigdata/spark/lib/*.jar
+
+bigdata/sqoop/lib/*.jar
+
+bigdata/warehouse/lib/*.jar
+bigdata/warehouse/data/ods/*
+bigdata/warehouse/logs/*
+bigdata/warehouse/data-collect-0.0.1-SNAPSHOT.jar
+
+### 管控checkpoint文件夹 ###
+/checkpoint/
+
+### 管控custom文件夹 ###
+/custom/**/output/*
+/custom/data/mr/skew/input/hello_10000000.dat
+/custom/data/mr/mrblock/input/s_name_140.dat
+/custom/data/mr/mrblock/input/s_name_141.dat

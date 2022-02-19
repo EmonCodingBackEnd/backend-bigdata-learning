@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>bigdata-learning</artifactId>
+        <groupId>com.coding.bigdata</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>bigdata-common</artifactId>
+
+
+    <properties>
+    </properties>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <!--provided表示这个依赖只在编译的时候有效，执行时或者打jar包时都不使用-->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>${spark.artifactId}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_2.12</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>
