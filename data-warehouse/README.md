@@ -189,10 +189,6 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/collect_data_incr.sh 20260101
 
 执行类：`com.coding.bigdata.useraction.GenerateUserActionData2`
 
-- 初始化GoodsOrder数据
-
-执行类：`com.coding.bigdata.useraction.GenerateGoodsOrderData2`
-
 ### 2.4.3·添加分区
 
 ```bash
@@ -689,4 +685,40 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/collect_data_incr.sh 20260101
 # 添加分区
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/dwd_add_partition.sh 20260101
 ```
+
+## 3.3、需求分析与模拟数据初始化
+
+### 3.3.1、需求列表
+
+- 需求1：用户信息宽表
+- 需求2：电商GMV
+- 需求3：商品相关指标
+- 需求4：漏斗分析
+
+### 3.3.2、模拟20260201-20260228数据
+
+- 初始化GoodsOrder数据
+
+执行类：`com.coding.bigdata.useraction.GenerateGoodsOrderData2`
+
+### 3.3.3·添加分区
+
+```bash
+# 添加ods分区：20260201-20260228
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/tmp_load_ods_data.sh
+# 添加dwd分区：20260201-20260228
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/tmp_load_dwd_data.sh
+```
+
+## 3.4、需求1：用户信息宽表
+
+### 3.4.1、指标1：用户信息宽表
+
+用户信息宽表包括服务端中的 *user* 表，*user_extend* 表。
+
+实现思路：
+
+对 *dwd_user* 表和 *dwd_user_extend* 表执行left join操作，通过user_id进行关联即可，将结果数据保存到 *dws_user_info_all* 表。
+
+### 3.4.2、脚本执行之DWS层
 
