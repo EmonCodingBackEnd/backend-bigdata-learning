@@ -644,7 +644,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/collect_data_incr.sh 20260101
 
 - 表介绍
 
-| 表名               | 说明           | 导入方式 |
+| 表名               | 解释           | 导入方式 |
 | ------------------ | -------------- | -------- |
 | ods_user           | 用户信息表     | 全量     |
 | ods_user_extend    | 用户扩展表     | 全量     |
@@ -655,3 +655,38 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/collect_data_incr.sh 20260101
 | ods_order_item     | 订单商品表     | 增量     |
 | ods_order_delivery | 订单收货表     | 增量     |
 | ods_payment_flow   | 支付流水表     | 增量     |
+
+- 创建hive库、hive外部表并设置分区
+
+```bash
+# 初始化ods库与表
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/ods_init_table.sh 
+# 添加分区
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/ods_add_partition.sh 20260101
+```
+
+## 3.2、创建DWD层
+
+- 表介绍
+
+| 表名               | 解释           |
+| ------------------ | -------------- |
+| dwd_user           | 用户信息表     |
+| dwd_user_extend    | 用户扩展表     |
+| dwd_user_addr      | 用户收货地址表 |
+| dwd_goods_info     | 商品信息表     |
+| dwd_category_code  | 商品类目码表   |
+| dwd_user_order     | 订单表         |
+| dwd_order_item     | 订单商品表     |
+| dwd_order_delivery | 订单收货表     |
+| dwd_payment_flow   | 支付流水表     |
+
+- 创建hive库、hive外部表并设置分区
+
+```bash
+# 初始化ods库与表
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/dwd_init_table.sh
+# 添加分区
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/dwd_add_partition.sh 20260101
+```
+
