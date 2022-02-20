@@ -1,0 +1,5 @@
+# dwd.job
+# 生成dwd层的数据
+type=command
+dependencies=ods
+command=sh /home/emon/bigdata/warehouse/shell/job/azkaban/gmvjob/dwd_add_partition.sh 20260105

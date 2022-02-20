@@ -1,0 +1,5 @@
+# app.job
+# 生成app层的数据
+type=command
+dependencies=dwd
+command=sh /home/emon/bigdata/warehouse/shell/job/azkaban/gmvjob/app_add_partition_2.sh 20260105

@@ -850,10 +850,6 @@ GMV多用于电商行业，实际指的是拍下的订单总金额，包含付�
 
 并且计算每一层的转化率，最终把结果数据保存到表 *app_user_conver_funnel*中。
 
-
-
-### 3.7.3、脚本执行之DWS层
-
 ### 3.7.2、脚本执行之APP层
 
 1：表初始化脚本（初始化执行一次）
@@ -1373,4 +1369,131 @@ Default Interpreter：jdbc
 - 步骤三：选择节点或创建节点后，进入sql执行界面
 
 ![image-20220220165638539](images/image-20220220165638539.png)
+
+
+
+# 五、任务调度
+
+## 5.1、Crontab调度
+
+Crontab调度器的使用，不太擅长处理有依赖关系的任务调度。也可以通过一些人为处理，勉强增加依赖关系：
+
+```bash
+[emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/job/crontab_job.scheduler.sh 20260201
+```
+
+
+
+## 5.2、Azkaban调度
+
+同类型的有Ooize，重量级的调度器；相比较，Azkaban是轻量级调度器，易上手。
+
+访问：http://emon:8081/
+
+用户名密码默认都是： azkaban
+
+### 5.2.1、创建项目
+
+![image-20220220183118548](images/image-20220220183118548.png)
+
+### 5.2.2、如何编写调度任务
+
+- 第一步：编写`hello.job`文件
+
+```properties
+# hello.job
+type=command
+command=echo "hello World!"
+```
+
+- 第二步：添加到zip包`hello.zip`
+- 第三步：在Azkaban页面test项目中，选择`Upload`上传zip包
+
+![image-20220220184322597](images/image-20220220184322597.png)
+
+- 第四步：上传zip包后，在任务列表点击执行任务
+
+![image-20220220184511176](images/image-20220220184511176.png)
+
+- 第五步：可以直接执行，也可以选择调度执行。
+
+### 5.2.3、有依赖关系的任务调度
+
+- 第一步：创建项目
+
+![image-20220220185304231](images/image-20220220185304231.png)
+
+- 第二步：创建`first.job`任务
+
+```properties
+# first.job
+type=command
+command=echo "Hello First!"
+```
+
+- 第三步：创建`second.job`任务
+
+```properties
+# second.job
+type=command
+dependencies=first
+command=echo "Hello Second!"
+```
+
+- 第三步：把两个任务打包到`first_second.zip`包
+- 第四步：上传任务
+- 第五步：配置执行
+
+### 5.2.4、数据仓库job编排
+
+以电商GMV指标为例：
+
+MySQL-->HDFS-->ODS-->DWD-->APP
+
+1：MySQL-->HDFS需要使用sqoop脚本
+
+2：HDFS-->ODS需要使用hive alter命令
+
+3：ODS-->DWD需要使用hive的sql
+
+4：DWD-->APP需要使用hive的sql
+
+
+
+- 创建项目`gmvjob`
+- 准备数据：`update user_order set order_date ='2026-01-05 19:28:29';`
+
+- 依次创建`collect.job`->`ods.job`->`dwd.job`->`app.job`
+- 打包到`gmvjob.zip`
+- 上传执行
+
+
+
+
+
+# 六、项目优化
+
+## 6.1、Sqoop数据采集参数调优
+
+默认只会启动一个map，可以增加多个map任务。
+
+## 6.2、集群Queue队列优化
+
+对数仓设置单独的离线yarn队列。
+
+## 6.3、避免任务启动时间过于集中
+
+## 6.4、Hive on Tez
+
+## 6.5、Impala提供快速交互查询
+
+一个比hive快几十倍的组件。
+
+
+
+
+
+
+
+
 

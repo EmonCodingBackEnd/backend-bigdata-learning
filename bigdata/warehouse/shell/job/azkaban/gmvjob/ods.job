@@ -1,0 +1,5 @@
+# ods.job
+# 关联ods层的数据
+type=command
+dependencies=collect
+command=sh /home/emon/bigdata/warehouse/shell/job/azkaban/gmvjob/ods_add_partition.sh 20260105

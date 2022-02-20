@@ -1,0 +1,4 @@
+# collect.job
+# 采集MySQL中的数据至HDFS
+type=command
+command=sh /home/emon/bigdata/warehouse/shell/job/azkaban/gmvjob/collect_mysql.sh 20260105
