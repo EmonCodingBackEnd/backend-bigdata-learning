@@ -701,7 +701,7 @@ sh /home/emon/bigdata/warehouse/shell/sqoop/collect_data_incr.sh 20260101
 
 执行类：`com.coding.bigdata.useraction.GenerateGoodsOrderData2`
 
-### 3.3.3·添加分区
+### 3.3.3、添加分区
 
 ```bash
 # 添加ods分区：20260201-20260228
@@ -868,5 +868,464 @@ GMV多用于电商行业，实际指的是拍下的订单总金额，包含付�
 ```bash
 # 重新统计全量数据
 [emon@emon ~]$ sh /home/emon/bigdata/warehouse/shell/goodsOrder/app_add_partition_4.sh 20260201
+```
+
+## 3.8、拉链表
+
+### 3.8.1、什么是拉链表？
+
+针对订单表、订单商品表、流水表，这些表中的数据是比较多的，如果使用全量的方式，会造成大量的数据冗余，浪费磁盘空间。所以这种表，一般使用增量的方式，每日采集新增的数据。
+
+在这注意一点：针对订单表，如果单纯的按照订单产生时间增量采集数据，是有问题的，因为用户可能今天下单，明天才支付，但是Hive是不支持数据更新的，这样虽然MySQL中订单的状态变化了，但是Hive中订单的状态还是之前的状态。
+
+想要解决这个问题，一般有这么几种方案：
+
+- 第一种：每天全量导入订单表的数据，这种方案在项目启动初期是没有多大问题的，因为前期数据量不大，但是随着项目的运营，订单量暴增，假设每天新增1亿订单，已经累计了100亿订单，如果每天都是全量导入的话，那也就意味着每天需都要把数据库中的100多亿订单数据导入到HDFS中保存一份，这样会极大的造成数据冗余，太浪费磁盘空间了。
+- 第二种：只保存当天的全量订单表数据，每次在导入之前，删除前一天保存的全量订单数据，这种方式虽然不会造成数据冗余，但是无法查询订单的历史状态，只有当前的最新状态，也不太好。
+- 第三种：拉链表，这种方式在普通增量导入方式的基础之上进行完善，把变化的数据也导入进来，这样既不会造成大量的数据冗余，还可以查询订单的历史状态。
+
+拉链表是针对数据仓库设计中表存储数据的方式而定义的，顾名思义，所谓拉链，就是记录历史。记录一个事物从开始，一直到当前状态的所有历史变化的信息。
+
+下面就是一张拉链表，存储的是用户的最基本信息以及每条记录的生命周期。
+
+我们可以使用这张表拿到当天的最新数据以及之前的历史数据。
+
+| 用户编号 | 手机号码 | start_time | end_time                              | 解释     |
+| -------- | -------- | ---------- | ------------------------------------- | -------- |
+| 001      | 1111     | 2026-01-01 | *<font color='red'>9999-12-31</font>* | 初始数据 |
+| 002      | 2222     | 2026-01-01 | 2026-01-01                            | 初始数据 |
+| 003      | 3333     | 2026-01-01 | *<font color='red'>9999-12-31</font>* | 初始数据 |
+| 002      | 2333     | 2026-01-02 | *<font color='red'>9999-12-31</font>* | 修改     |
+| 004      | 4444     | 2026-01-03 | *<font color='red'>9999-12-31</font>* | 新增     |
+
+说明：
+
+start_time：表示该条记录的生命周期开始时间，end_time表示该条记录的生命周期结束时间。
+
+注意用户编号002的数据，第四条记录的start_time比第二条数据的end_time大1天。
+
+end_time='9999-12-31'表示该条记录目前处于有效状态；
+
+如果查询当前所有有效的记录，则使用SQL：
+
+```sql
+select * from user where end_time='9999-12-31';
+```
+
+如果查询 2026-01-02 的历史快照【获取指定时间内的有效数据】，则使用SQL：
+
+```sql
+select * from user where start_time<='2026-01-02' and end_time>='2026-01-02';
+```
+
+### 3.8.2、如何制作拉链表？
+
+那针对我们前面分析的订单表，希望使用拉链表的方式实现数据采集，因为每天都保存全量订单数据比较浪费磁盘空间，但是只采集增量的话无法反应订单的状态变化。所以需要即采集增量，还要采集订单状态变化了的数据。
+
+针对订单表中的订单状态字段有这么几个阶段：
+
+未支付
+
+已支付
+
+未发货
+
+已发货
+
+在这我们先分析两种状态：未支付和已支付。
+
+
+
+我们先举个例子：
+
+假设我们的系统是2026年3月1日开始运营的，那么到3月1日结束订单表所有数据如下：
+
+| 订单ID | 创建时间   | 更新时间   | 订单状态 | 解释 |
+| ------ | ---------- | ---------- | -------- | ---- |
+| 001    | 2026-03-01 | null       | 未支付   | 新增 |
+| 002    | 2026-03-01 | 2026-03-01 | 已支付   | 新增 |
+
+3月2日结束订单表所有数据如下：
+
+| 订单 | 创建时间                              | 更新时间                              | 订单状态 | 解释 |
+| ---- | ------------------------------------- | ------------------------------------- | -------- | ---- |
+| 001  | 2026-03-01                            | *<font color='red'>2026-03-02</font>* | 已支付   | 修改 |
+| 002  | 2026-03-01                            | 2026-03-01                            | 已支付   |      |
+| 003  | *<font color='red'>2026-03-02</font>* | *<font color='red'>2026-03-02</font>* | 已支付   | 新增 |
+
+基于订单表中的这些数据如何制作拉链表？
+
+实现思路：
+
+1：首先针对3月1号中的订单数据构建初始的拉链表，拉链表中需要有一个start_time（数据生效开始时间）和end_time（数据生效结束时间），默认情况下start_time等于表中的创建时间，end_time初始化为一个无限大的日期9999-12-31.
+
+将3月1号的订单数据导入到拉链表中。
+
+此时拉链表中数据如下：
+
+| 订单ID | 订单状态 | start_time | end_time   |
+| ------ | -------- | ---------- | ---------- |
+| 001    | 未支付   | 2026-03-01 | 9999-12-31 |
+| 002    | 已支付   | 2026-03-01 | 9999-12-31 |
+
+2：在3月2号的时候，需要将 *<font color='red'>订单表中发生了变化的数据和新增的订单数据</font>* 整合到之前的拉链表中。
+
+此时需要 *<font color='red'>先创建一个每日新增表</font>*，将每日新增和变化了的数据保存到里面。
+
+然后基于 *<font color='red'>拉链表</font>* 和这个 *<font color='red'>每日更新表</font>* 进行 *<font color='red'>left join</font>*，根据订单id进行关联，如果可以关联上，就说明这个订单的状态发生了变化，然后将订单状态发生了变化的数据的end_time改为2026-03-01（当天时间-1天）。
+
+然后再和每日更新表中的数据执行union all操作，将结果重新insert到拉链表中。
+
+最终拉链表中的数据如下：
+
+| 订单ID                         | 订单状态                          | start_time                            | end_time                              |
+| ------------------------------ | --------------------------------- | ------------------------------------- | ------------------------------------- |
+| 001                            | 未支付                            | 2026-03-01                            | *<font color='red'>2026-03-01</font>* |
+| 002                            | 已支付                            | 2026-03-01                            | 9999-12-31                            |
+| *<font color='red'>001</font>* | *<font color='red'>已支付</font>* | *<font color='red'>2026-03-02</font>* | *<font color='red'>9999-12-31</font>* |
+| *<font color='red'>003</font>* | *<font color='red'>已支付</font>* | *<font color='red'>2026-03-02</font>* | *<font color='red'>9999-12-31</font>* |
+
+解释：因为在3月2号的时候，订单id为001的数据的订单状态发生了变化，所以拉链表中订单为001的原始数据的end_time需要修改为2026-03-01，然后需要新增一条订单id为001的数据，订单状态为已支付，start_time为2026-03-02，end_time为9999-12-31。还需要将3月2号新增的订单id为003的数据也添加进来。
+
+### 3.9、【实战】基于订单表的拉链表实现
+
+下面我们开始实现：
+
+1：首先初始化2026-03-01、2026-03-02和2026-03-03的订单表新增和变化的数据，*ods_user_order* （直接将数据初始化到HDFS中），这个表其实就是前面我们所说的 *<font color='red'>每日更新表</font>*。
+
+注意：这里模拟使用sqoop从mysql中抽取新增和变化的数据，根据order_date和update_time这两个字段获取这些数据，所以此时*ods_user_order* 中的数据就是每日的新增和变化了的数据。
+
+### 3.9.1、模拟20260301-20260303拉链表数据
+
+- 初始化订单数据
+
+执行类：`com.coding.bigdata.useraction.GenerateZipData`
+
+### 3.9.2、加载拉链表数据到分区之ODS层
+
+*ods_user_order* 在前面已经使用过，所以在这只需要将2026-03-01、2026-03-02和2026-03-03的数据加载进去即可。
+
+```sql
+hive (default)> alter table ods_warehousedb.ods_user_order add if not exists partition(dt='20260301') location '20260301';
+hive (default)> alter table ods_warehousedb.ods_user_order add if not exists partition(dt='20260302') location '20260302';
+hive (default)> alter table ods_warehousedb.ods_user_order add if not exists partition(dt='20260303') location '20260303';
+```
+
+### 3.9.3、加载拉链表数据到分区之DWD层
+
+如下命令在hive命令行执行：
+
+```sql
+-- 20260301
+insert overwrite table dwd_warehousedb.dwd_user_order partition(dt='20260301')
+select
+   order_id,
+   order_date,
+   user_id,
+   order_money,
+   order_type,
+   order_status,
+   pay_id,
+   update_time
+from ods_warehousedb.ods_user_order
+where dt='20260301' and order_id is not null;
+
+-- 20260302
+insert overwrite table dwd_warehousedb.dwd_user_order partition(dt='20260302')
+select
+   order_id,
+   order_date,
+   user_id,
+   order_money,
+   order_type,
+   order_status,
+   pay_id,
+   update_time
+from ods_warehousedb.ods_user_order
+where dt='20260302' and order_id is not null;
+
+-- 20260303
+insert overwrite table dwd_warehousedb.dwd_user_order partition(dt='20260303')
+select
+   order_id,
+   order_date,
+   user_id,
+   order_money,
+   order_type,
+   order_status,
+   pay_id,
+   update_time
+from ods_warehousedb.ods_user_order
+where dt='20260303' and order_id is not null;
+```
+
+### 3.9.4、加载拉链表数据到分区之DWS层
+
+#### 3.9.4.1、创建拉链表：*dws_user_order_zip* 
+
+基于每日更新订单表构建拉链表中的数据
+
+如下命令在hive命令行执行：
+
+```sql
+create external table if not exists dws_warehousedb.dws_user_order_zip(
+   order_id             bigint,
+   order_date           string,
+   user_id              bigint,
+   order_money          double,
+   order_type           int,
+   order_status         int,
+   pay_id               bigint,
+   update_time          string,
+   start_time           string,
+   end_time             string
+)
+row format delimited
+fields terminated by '\t'
+location 'hdfs://emon:8020/custom/data/warehouse/dws/user_order_zip/';
+```
+
+#### 3.9.4.2、向拉链表添加数据
+
+- 添加2026-03-01的全量数据至拉链表（初始化操作）
+
+```sql
+insert overwrite table dws_warehousedb.dws_user_order_zip
+select 
+    t.order_id,
+    t.order_date,
+    t.user_id,
+    t.order_money,
+    t.order_type,
+    t.order_status,
+    t.pay_id,
+    t.update_time,
+    t.start_time,
+    t.end_time
+from
+(   
+    select
+        duoz.order_id,
+        duoz.order_date,
+        duoz.user_id,
+        duoz.order_money,
+        duoz.order_type,
+        duoz.order_status,
+        duoz.pay_id,
+        duoz.update_time,
+        duoz.start_time,
+        case
+            when duoz.end_time='9999-12-31' and duo.order_id is not null
+            then date_add('2026-03-01', -1)
+            else duoz.end_time
+        end as end_time
+    from dws_warehousedb.dws_user_order_zip as duoz
+    left join 
+    (
+        select order_id from dwd_warehousedb.dwd_user_order
+        where dt='20260301'
+    ) as duo
+    on duoz.order_id=duo.order_id
+union all
+    select
+        duo.order_id,
+        duo.order_date,
+        duo.user_id,
+        duo.order_money,
+        duo.order_type,
+        duo.order_status,
+        duo.pay_id,
+        duo.update_time,
+        '2026-03-01' as start_time,
+        '9999-12-31' as end_time
+    from dwd_warehousedb.dwd_user_order as duo
+    where duo.dt='20260301'
+) as t;
+```
+
+查询验证：
+
+```sql
+hive (default)> select * from dws_warehousedb.dws_user_order_zip;
+# 查询结果
+30001	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	9999-12-31
+30002	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	9999-12-31
+30003	2026-03-01 10:10:10	10096	200.0	1	1	40001	2026-03-01 11:11:11	2026-03-01	9999-12-31
+```
+
+- 添加2026-03-02的全量数据至拉链表
+
+```sql
+insert overwrite table dws_warehousedb.dws_user_order_zip
+select 
+    t.order_id,
+    t.order_date,
+    t.user_id,
+    t.order_money,
+    t.order_type,
+    t.order_status,
+    t.pay_id,
+    t.update_time,
+    t.start_time,
+    t.end_time
+from
+(   
+    select
+        duoz.order_id,
+        duoz.order_date,
+        duoz.user_id,
+        duoz.order_money,
+        duoz.order_type,
+        duoz.order_status,
+        duoz.pay_id,
+        duoz.update_time,
+        duoz.start_time,
+        case
+            when duoz.end_time='9999-12-31' and duo.order_id is not null
+            then date_add('2026-03-02', -1)
+            else duoz.end_time
+        end as end_time
+    from dws_warehousedb.dws_user_order_zip as duoz
+    left join 
+    (
+        select order_id from dwd_warehousedb.dwd_user_order
+        where dt='20260302'
+    ) as duo
+    on duoz.order_id=duo.order_id
+union all
+    select
+        duo.order_id,
+        duo.order_date,
+        duo.user_id,
+        duo.order_money,
+        duo.order_type,
+        duo.order_status,
+        duo.pay_id,
+        duo.update_time,
+        '2026-03-02' as start_time,
+        '9999-12-31' as end_time
+    from dwd_warehousedb.dwd_user_order as duo
+    where duo.dt='20260302'
+) as t;
+```
+
+查询验证：
+
+```sql
+hive (default)> select * from dws_warehousedb.dws_user_order_zip;
+# 查询结果
+30001	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	9999-12-31
+30002	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	2026-03-01
+30003	2026-03-01 10:10:10	10096	200.0	1	1	40001	2026-03-01 11:11:11	2026-03-01	9999-12-31
+30002	2026-03-01 10:10:10	10096	200.0	1	1	40002	2026-03-02 11:11:11	2026-03-02	9999-12-31
+30004	2026-03-02 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-02	9999-12-31
+30005	2026-03-02 10:10:10	10096	200.0	1	1	40003	2026-03-02 11:11:11	2026-03-02	9999-12-31
+```
+
+查询有效数据：
+
+```sql
+hive (default)> select * from dws_warehousedb.dws_user_order_zip where end_time='9999-12-31';
+# 查询结果
+30001	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	9999-12-31
+30003	2026-03-01 10:10:10	10096	200.0	1	1	40001	2026-03-01 11:11:11	2026-03-01	9999-12-31
+30002	2026-03-01 10:10:10	10096	200.0	1	1	40002	2026-03-02 11:11:11	2026-03-02	9999-12-31
+30004	2026-03-02 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-02	9999-12-31
+30005	2026-03-02 10:10:10	10096	200.0	1	1	40003	2026-03-02 11:11:11	2026-03-02	9999-12-31
+```
+
+查询2026-03-01号的切片数据：
+
+```sql
+hive (default)> select * from dws_warehousedb.dws_user_order_zip where start_time<='2026-03-01' and end_time>='2026-03-01';
+# 查询结果
+30001	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	9999-12-31
+30002	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	2026-03-01
+30003	2026-03-01 10:10:10	10096	200.0	1	1	40001	2026-03-01 11:11:11	2026-03-01	9999-12-31
+```
+
+查询2026-03-02号的切片数据：
+
+```sql
+hive (default)> select * from dws_warehousedb.dws_user_order_zip where start_time<='2026-03-02' and end_time>='2026-03-02';
+# 查询结果
+30001	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	9999-12-31
+30003	2026-03-01 10:10:10	10096	200.0	1	1	40001	2026-03-01 11:11:11	2026-03-01	9999-12-31
+30002	2026-03-01 10:10:10	10096	200.0	1	1	40002	2026-03-02 11:11:11	2026-03-02	9999-12-31
+30004	2026-03-02 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-02	9999-12-31
+30005	2026-03-02 10:10:10	10096	200.0	1	1	40003	2026-03-02 11:11:11	2026-03-02	9999-12-31
+```
+
+- 添加2026-03-03的全量数据至拉链表
+
+```sql
+insert overwrite table dws_warehousedb.dws_user_order_zip
+select 
+    t.order_id,
+    t.order_date,
+    t.user_id,
+    t.order_money,
+    t.order_type,
+    t.order_status,
+    t.pay_id,
+    t.update_time,
+    t.start_time,
+    t.end_time
+from
+(   
+    select
+        duoz.order_id,
+        duoz.order_date,
+        duoz.user_id,
+        duoz.order_money,
+        duoz.order_type,
+        duoz.order_status,
+        duoz.pay_id,
+        duoz.update_time,
+        duoz.start_time,
+        case
+            when duoz.end_time='9999-12-31' and duo.order_id is not null
+            then date_add('2026-03-03', -1)
+            else duoz.end_time
+        end as end_time
+    from dws_warehousedb.dws_user_order_zip as duoz
+    left join 
+    (
+        select order_id from dwd_warehousedb.dwd_user_order
+        where dt='20260303'
+    ) as duo
+    on duoz.order_id=duo.order_id
+union all
+    select
+        duo.order_id,
+        duo.order_date,
+        duo.user_id,
+        duo.order_money,
+        duo.order_type,
+        duo.order_status,
+        duo.pay_id,
+        duo.update_time,
+        '2026-03-03' as start_time,
+        '9999-12-31' as end_time
+    from dwd_warehousedb.dwd_user_order as duo
+    where duo.dt='20260303'
+) as t;
+```
+
+查询验证：
+
+```sql
+hive (default)> select * from dws_warehousedb.dws_user_order_zip;
+# 查询结果
+30001	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	2026-03-02
+30002	2026-03-01 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-01	2026-03-01
+30003	2026-03-01 10:10:10	10096	200.0	1	1	40001	2026-03-01 11:11:11	2026-03-01	9999-12-31
+30002	2026-03-01 10:10:10	10096	200.0	1	1	40002	2026-03-02 11:11:11	2026-03-02	9999-12-31
+30004	2026-03-02 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-02	2026-03-02
+30005	2026-03-02 10:10:10	10096	200.0	1	1	40003	2026-03-02 11:11:11	2026-03-02	9999-12-31
+30001	2026-03-01 10:10:10	10096	200.0	1	1	40004	2026-03-03 11:11:11	2026-03-03	9999-12-31
+30004	2026-03-02 10:10:10	10096	200.0	1	1	40005	2026-03-03 11:11:11	2026-03-03	9999-12-31
+30006	2026-03-03 10:10:10	10096	200.0	1	1	40006	2026-03-03 11:11:11	2026-03-03	9999-12-31
+30007	2026-03-03 10:10:10	10096	200.0	1	0	NULL	NULL	2026-03-03	9999-12-31
 ```
 

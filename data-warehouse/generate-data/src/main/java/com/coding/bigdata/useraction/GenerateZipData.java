@@ -17,7 +17,7 @@ public class GenerateZipData {
         String dataUrl = "http://data.xuwei.tech/d1/go3";
         JSONObject paramObj = new JSONObject();
         // TODO code:校验码，需要到微信公众号上获取有效校验码,具体操作流程见电子书
-        paramObj.put("code", "imooc"); // 校验码
+        paramObj.put("code", "DC68F89C4E9D0416"); // 校验码
         JSONObject dataObj = HttpUtils.doPost(dataUrl, paramObj);
         // logger.info(dataObj.toJSONString());
         // 判断获取的用户行为数据是否正确
@@ -44,7 +44,10 @@ public class GenerateZipData {
                 }
                 // 将数据上传到HDFS上面，注意：需要关闭HDFS的权限校验机制
                 String hdfsOutPath =
-                        "hdfs://bigdata01:9000/data/ods/" + tableName + "/" + dt.replace("-", "");
+                        "hdfs://emon:8020/custom/data/warehouse/ods/"
+                                + tableName
+                                + "/"
+                                + dt.replace("-", "");
                 String fileName = tableName + "-" + dt + ".log";
                 logger.info("开始上传：" + hdfsOutPath + "/" + fileName);
                 HDFSOpUtils.put(sb.toString(), hdfsOutPath, fileName);
