@@ -20,6 +20,7 @@
         <module>flume-learning</module>
         <module>kafka-learning</module>
         <module>redis-learning</module>
+        <module>flink-learning</module>
     </modules>
 
 
@@ -52,6 +53,8 @@
         <kafka.version>2.5.1</kafka.version>
         <!--定义Jedis版本-->
         <jedis.version>3.8.0</jedis.version>
+        <!--定义Flink版本-->
+        <flink.version>1.11.1</flink.version>
 
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -162,6 +165,35 @@
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
                 <version>${jedis.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-java -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-java</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-streaming-java -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-streaming-java_2.12</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-scala -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-scala_2.12</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-streaming-scala -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-streaming-scala_2.12</artifactId>
+                <version>${flink.version}</version>
+            </dependency><!-- https://mvnrepository.com/artifact/org.apache.flink/flink-clients -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-clients_2.12</artifactId>
+                <version>${flink.version}</version>
             </dependency>
 
 
