@@ -95,6 +95,7 @@ public final class EnvUtils {
             Path inputHdfsPath = new Path(filePath);
             if (!fileSystem.exists(inputHdfsPath)) {
                 log.error("hdfs目录/文件不存在 filePath={}", filePath);
+                throw new RuntimeException("目录/文件不存在");
             }
         }
     }

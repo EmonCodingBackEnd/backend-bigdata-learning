@@ -1,4 +1,4 @@
-package com.coding.bigdata.flink
+package com.coding.bigdata.flink.stream
 
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.windowing.time.Time

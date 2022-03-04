@@ -28,6 +28,7 @@ public class HdfsCommand {
         uploadSparkHello(fileSystem);
         uploadSparkVideoInfo(fileSystem);
         uploadSparkGiftRecord(fileSystem);
+        uploadFlinkHello(fileSystem);
     }
 
     private static void uploadNormal(FileSystem fileSystem) throws IOException {
@@ -65,6 +66,14 @@ public class HdfsCommand {
         FileInputStream fis = new FileInputStream("./custom/data/spark/topN/input/gift_record.log");
         FSDataOutputStream fsdos =
                 fileSystem.create(new Path("/custom/data/spark/topN/input/gift_record.log"));
+        // 上传文件：通过工具类把输入流拷贝到输出流里面，实现本地文件上传到HDFS
+        IOUtils.copyBytes(fis, fsdos, 1024, true);
+    }
+
+    private static void uploadFlinkHello(FileSystem fileSystem) throws IOException {
+        FileInputStream fis = new FileInputStream("./custom/data/flink/batch/input/hello.txt");
+        FSDataOutputStream fsdos =
+                fileSystem.create(new Path("/custom/data/flink/batch/input/hello.txt"));
         // 上传文件：通过工具类把输入流拷贝到输出流里面，实现本地文件上传到HDFS
         IOUtils.copyBytes(fis, fsdos, 1024, true);
     }
