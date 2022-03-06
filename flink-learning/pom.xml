@@ -32,6 +32,7 @@
             <artifactId>flink-scala_2.12</artifactId>
             <scope>${scope.level}</scope>
         </dependency>
+        <!--除了flink实时API之外，部分table相关的代码是使用Scala实现的，需要依赖该jar-->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-scala_2.12</artifactId>
@@ -40,12 +41,42 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients_2.12</artifactId>
+            <scope>${scope.level}</scope>
         </dependency>
 
         <!--Exception in thread "main" java.lang.NoClassDefFoundError: org/apache/hadoop/conf/Configuration-->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
+            <scope>${scope.level}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.bahir</groupId>
+            <artifactId>flink-connector-redis_2.11</artifactId>
+        </dependency>
+
+        <!--如果想要使用Table API和SQL的话，需要添加下面的依赖-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java-bridge_2.12</artifactId>
+            <scope>${scope.level}</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-scala-bridge_2.12</artifactId>
+            <scope>${scope.level}</scope>
+        </dependency>
+        <!--如果想要在本地IDE中运行程序，还需要添加下面的依赖-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-planner-blink_2.12</artifactId>
+            <scope>${scope.level}</scope>
+        </dependency>
+        <!--如果你用到了老的执行引擎，还需要添加下面这个依赖-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-planner_2.12</artifactId>
             <scope>${scope.level}</scope>
         </dependency>
     </dependencies>

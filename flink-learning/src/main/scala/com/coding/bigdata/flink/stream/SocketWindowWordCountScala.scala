@@ -8,6 +8,22 @@ import org.apache.flink.streaming.api.windowing.time.Time
  * 使用Flink实时接收数据
  * 对指定时间窗口内（例如：2秒）的数据进行聚合统计
  * 并且把时间窗口内计算的结果打印出来
+ *
+ * 前提：在启动该程序之前，先在指定主机emon启动命令： nc -lk 9000
+ * 等启动程序后，在emon主机终端输入： hello you hello me
+ *
+ * 任务提交方式：
+ * 方式1、Window环境执行方式：直接在IDEA中执行，方便在本地环境调试代码
+ * 方式2、Linux环境执行方式：使用flink提交到集群执行【实际工作中使用】
+ * 创建脚本： [emon@emon ~]$ vim /home/emon/bigdata/flink/shell/socketWindowWordCountScala.sh
+ * 脚本内容：如下：
+flink \
+run -m yarn-cluster \
+-c com.coding.bigdata.flink.stream.SocketWindowWordCountScala \
+-yjm 1024 -ytm 1024 \
+/home/emon/bigdata/flink/lib/flink-learning-1.0-SNAPSHOT-jar-with-dependencies.jar
+ * 修改脚本可执行权限：[emon@emon ~]$ chmod u+x /home/emon/bigdata/flink/shell/socketWindowWordCountScala.sh
+ * 执行脚本：[emon@emon ~]$ sh -x /home/emon/bigdata/flink/shell/socketWindowWordCountScala.sh
  */
 object SocketWindowWordCountScala {
 

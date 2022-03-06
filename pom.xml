@@ -54,7 +54,7 @@
         <!--定义Jedis版本-->
         <jedis.version>3.8.0</jedis.version>
         <!--定义Flink版本-->
-        <flink.version>1.11.1</flink.version>
+        <flink.version>1.11.6</flink.version>
 
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -184,15 +184,61 @@
                 <artifactId>flink-scala_2.12</artifactId>
                 <version>${flink.version}</version>
             </dependency>
+            <!--除了flink实时API之外，部分table相关的代码是使用Scala实现的，需要依赖该jar-->
             <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-streaming-scala -->
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-streaming-scala_2.12</artifactId>
                 <version>${flink.version}</version>
-            </dependency><!-- https://mvnrepository.com/artifact/org.apache.flink/flink-clients -->
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-clients -->
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-clients_2.12</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.bahir/flink-connector-redis -->
+            <dependency>
+                <groupId>org.apache.bahir</groupId>
+                <artifactId>flink-connector-redis_2.11</artifactId>
+                <version>1.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--如果想要使用Table API和SQL的话，需要添加下面的依赖-->
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java-bridge -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-api-java-bridge_2.12</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-scala-bridge -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-api-scala-bridge_2.12</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!--如果想要在本地IDE中运行程序，还需要添加下面的依赖-->
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-planner-blink -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-planner-blink_2.12</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!--如果你用到了老的执行引擎，还需要添加下面这个依赖-->
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-planner -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-planner_2.12</artifactId>
                 <version>${flink.version}</version>
             </dependency>
 

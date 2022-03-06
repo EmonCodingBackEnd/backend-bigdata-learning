@@ -15,6 +15,9 @@ import org.apache.flink.util.Collector;
  * 使用Flink实时接收数据
  * 对指定时间窗口内（例如：2秒）的数据进行聚合统计
  * 并且把时间窗口内计算的结果打印出来
+ *
+ * 前提：在启动该程序之前，先在指定主机emon启动命令： nc -lk 9000
+ * 等启动程序后，在emon主机终端输入： hello you hello me
  */
 public class SocketWindowWordCountJava {
 
