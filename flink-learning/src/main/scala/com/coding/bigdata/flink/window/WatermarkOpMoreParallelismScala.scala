@@ -18,15 +18,15 @@ import scala.util.Sorting
 /*
  * Watermark+EventTime解决数据乱序问题
  */
-object WatermarkOpScala {
+object WatermarkOpMoreParallelismScala {
 
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     // 设置使用数据产生的时间：EventTime
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
-    // 设置全局并行度为1
-    env.setParallelism(1)
+    // 设置全局并行度为2
+    env.setParallelism(2)
     // 设置自动周期性的产生Watermark，默认值为200毫秒
     env.getConfig.setAutoWatermarkInterval(200)
 
@@ -57,12 +57,13 @@ object WatermarkOpScala {
 
               // 计算当前的Watermark，为了打印出来，方便观察数据，没有别的作用
               currentWatermark = currentMaxTimestamp - 10000L
+              val threadId = Thread.currentThread().getId
               // 此println语句仅仅是为了在学习阶段观察数据的变化
-              println(
-                "key:" + ele._1
-                  + ",eventTime:[" + ele._2 + "|" + sdf.format(ele._2) + "]"
-                  + ",currentMaxTimestamp:[" + currentMaxTimestamp + "|" + sdf.format(currentMaxTimestamp) + "]"
-                  + ",currentWatermark:[" + currentWatermark + "|" + sdf.format(currentWatermark) + "]"
+              println("threadId:" + threadId +
+                ",key:" + ele._1
+                + ",eventTime:[" + ele._2 + "|" + sdf.format(ele._2) + "]"
+                + ",currentMaxTimestamp:[" + currentMaxTimestamp + "|" + sdf.format(currentMaxTimestamp) + "]"
+                + ",currentWatermark:[" + currentWatermark + "|" + sdf.format(currentWatermark) + "]"
               )
 
               timestamp

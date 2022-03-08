@@ -4,7 +4,7 @@ import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, Wat
 import org.apache.flink.api.java.tuple.Tuple
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.scala.function.WindowFunction
-import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
+import org.apache.flink.streaming.api.scala.{DataStream, OutputTag, StreamExecutionEnvironment}
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow
@@ -18,7 +18,7 @@ import scala.util.Sorting
 /*
  * Watermark+EventTime解决数据乱序问题
  */
-object WatermarkOpScala {
+object WatermarkOpForSideOutputLateDataScala {
 
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
@@ -72,11 +72,14 @@ object WatermarkOpScala {
         )
     )
 
-    waterMarkStream.keyBy(0)
+    // 保存被丢弃的数据：第一步
+    val outputTag = new OutputTag[Tuple2[String, Long]]("late-data") {}
+
+    val resStream: DataStream[String] = waterMarkStream.keyBy(0)
       // 按照消息的EventTime分配窗口，和调用TimeWindow效果一样
       .window(TumblingEventTimeWindows.of(Time.seconds(3)))
-      // 允许数据迟到2秒
-      .allowedLateness(Time.seconds(2))
+      // 保存被丢弃的数据：第二步
+      .sideOutputLateData(outputTag)
       // 使用全量聚合的方式处理Window中的数据
       .apply(
         /*
@@ -104,7 +107,14 @@ object WatermarkOpScala {
             val result = keyStr + "," + arr.length + "," + sdf.format(arr.head) + "," + sdf.format(arr.last) + "," + sdf.format(window.getStart) + "," + sdf.format(window.getEnd)
             println(result)
           }
-        }).print()
+        })
+
+    // 保存被丢弃的数据：第三步。把迟到的数据取出来，暂时打印到控制台，实际工作中可以选择存储到其它存储介质中，例如：redis，kafka
+    val sideOutput = resStream.getSideOutput(outputTag)
+    sideOutput.print()
+
+    // 将流中的结果数据也打印到控制台
+    resStream.print()
 
     env.execute(this.getClass.getSimpleName)
   }
