@@ -213,6 +213,20 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-connector-kafka_2.12</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <!--Checkpoint时State数据保存使用RocksDBStateBackend方式时，依赖的jar-->
+            <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-statebackend-rocksdb -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-statebackend-rocksdb_2.12</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
 
             <!--如果想要使用Table API和SQL的话，需要添加下面的依赖-->
             <!-- https://mvnrepository.com/artifact/org.apache.flink/flink-table-api-java-bridge -->

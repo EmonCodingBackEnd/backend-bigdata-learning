@@ -55,6 +55,15 @@
             <groupId>org.apache.bahir</groupId>
             <artifactId>flink-connector-redis_2.11</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka_2.12</artifactId>
+        </dependency>
+        <!--Checkpoint时State数据保存使用RocksDBStateBackend方式时，依赖的jar-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-statebackend-rocksdb_2.12</artifactId>
+        </dependency>
 
         <!--如果想要使用Table API和SQL的话，需要添加下面的依赖-->
         <dependency>
