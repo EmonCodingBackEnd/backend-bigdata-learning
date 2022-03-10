@@ -15,8 +15,9 @@ object EnvScalaUtils {
         /*
          * 解决bug
          * A master URL must be set in your configuration
+         * 注意：此处的local[2]在SparkStreaming中表示启动2个进程，一个进程负责读取数据源的数据，一个进程负责处理数据
          */
-        .setMaster("local") // local[2]表示本地执行，使用2个工作线程的 StreamingContext；local表示1个工作线程；local[*]自动获取
+        .setMaster("local[2]") // local[2]表示本地执行，使用2个工作线程的 StreamingContext；local表示1个工作线程；local[*]自动获取
         /*
          * 解决bug
          * java.lang.IllegalArgumentException: System memory 259522560 must be at least 471859200. Please increase heap size using the --driver-memory option or spark.driver.memory in Spark configuration.
@@ -34,7 +35,7 @@ object EnvScalaUtils {
         "hadoop.home.dir", "C:\\Job\\JobSoftware\\hadoop-common-2.2.0-bin-master")
 
       builder.appName(appName)
-        .master("local") // local[2]表示本地执行，使用2个工作线程的 StreamingContext；local表示1个工作线程；local[*]自动获取
+        .master("local[2]") // local[2]表示本地执行，使用2个工作线程的 StreamingContext；local表示1个工作线程；local[*]自动获取
         .config("spark.testing.memory", 512 * 1024 * 1024 + "")
     }
 
