@@ -3,7 +3,7 @@ package com.coding.bigdata.redis;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
-/** Pipeline（管道的使用 */
+/** Pipeline（管道的使用） */
 public class PipelineOp {
     public static void main(String[] args) {
         // 1：不适用管道
