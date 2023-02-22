@@ -357,7 +357,6 @@
             <version>2.17.1</version>
         </dependency>
         <!--该包是 log4j 升级到 log4j2的必须包 使用该包 不需要修改以前的 Logger.getLogger()这种获取对象的方式-->
-        <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-1.2-api -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-1.2-api</artifactId>
